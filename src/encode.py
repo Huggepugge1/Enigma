@@ -1,6 +1,6 @@
 def base32_encode(string: bytes) -> bytes:
     """
-    Encode base32 string
+    Encode base32
     """
     base32_chars = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
     result = b""
@@ -125,8 +125,6 @@ print(base32_decode(b"JBSWY3DPEBLW64TMMQ======"))
 
 print(base64_encode(b"Hello World"))
 print(base64_decode(b"SGVsbG8gV29ybGQ="))
-
-print(f"{from_base85([21, 79, 73, 64, 27]):b}")
 
 print(base85_encode(b"Hello World"))
 print(base85_decode(b"87cURD]i,\"Ebo7d"))
