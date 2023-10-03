@@ -5,26 +5,83 @@ from std_functions import log, output
 
 wordlist = set(brown.words())
 
+extra_words = {
+    # Flags
+    "picoctf",
+    # CS stuff
+    "src",
+    "kb",
+    "mb",
+    "gb",
+    "tb", 
+    # File extensions
+    "exe",
+    "jpg",
+    "jpeg",
+    "txt"
+}
+
+wordlist.update(extra_words)
 
 def calculate_similarity_to_english(input_text: bytes) -> float:
     """
     Used for evaluation of strings, not recommended for use outside this library
     """
-    input_words = nltk.word_tokenize(str(input_text).lower())
+    nums = 0
+    for c in input_text:
+        if (c >= 48 and c <= 57) or c == b" " or c == b".":
+            nums += 1
+
+    if nums / len(input_text) >= 0.8:
+        return 0.3
+
+    replacement_symbols = {
+        b".": b" ",
+        b":": b" ",
+        b"_": b" ",
+        b"/": b" ",
+        b"(": b" ",
+        b")": b" ",
+        b"[": b" ",
+        b"]": b" ",
+        b"{": b" ",
+        b"}": b" ",
+        b"0": b"o",
+        b"1": b"i",
+        b"3": b"e"
+    }
+
+    for symbol in replacement_symbols:
+        input_text = input_text.replace(symbol, replacement_symbols[symbol])
+
+    while b"  " in input_text:
+        input_text = input_text.replace(b"  ", b" ")
+
+    input_words = str(input_text).lower().split()
+    input_words[0] = input_words[0][2:]
+    input_words[-1] = input_words[-1][:-1]
     total_words = len(input_words)
     english_words = 0
+
+
     for word in input_words:
         if word in wordlist:
             k = 3
-            weight = 1 / (1 + math.exp(-k * (len(word) - 3)))
+            weight = 1 / (1 + math.exp(-k * (len(word) - 4)))
             english_words += weight
 
     similarity = english_words / total_words
+
     return similarity
 
 
-def caesar(string: bytes, n: int = None, known_strings: list[bytes] = None, possible_strings: list[bytes] = None,
-        verbose: bool = False, output_file: str = "stdout") -> list[bytes]:
+def caesar(
+        string: bytes, 
+        n: int = None, 
+        known_strings: list[bytes] = None, 
+        possible_strings: list[bytes] = None,
+        verbose: bool = False, 
+        output_file: str = "stdout") -> list[bytes]:
     """
     Decrypt Caesar-ciphers.
     Returns a list of all possibilities. Ranks them by likelihood of english
@@ -104,6 +161,7 @@ def caesar(string: bytes, n: int = None, known_strings: list[bytes] = None, poss
 
             current_result = b""
             for char in string:
+                char = char
                 if upper(char):
                     current_result += ((((char - 65) + i) % 26) + 65).to_bytes()
                 elif lower(char):
@@ -117,5 +175,4 @@ def caesar(string: bytes, n: int = None, known_strings: list[bytes] = None, poss
     result.sort(key=calculate_similarity_to_english, reverse=True)
     return result
 
-
-print(caesar(b"TRVJRI TZGYVIJ RIV HLZKV VRJP KF TIRTB", known_strings=None, possible_strings=None, verbose=True))
+# print(calculate_similarity_to_english(b"src"))

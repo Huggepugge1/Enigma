@@ -1,3 +1,99 @@
+from std_functions import *
+
+
+def bytes_to_words(string: bytes, delimiter=" ") -> str:
+    """
+    Bytes to words
+    """
+    result = ""
+    for c in range(0, len(string), 2):
+        result += chr((ord(string[c]) << 8) + ord(string[c + 1]))
+        result += delimiter
+
+    return result
+
+
+def words_to_bytes(string: str, delimiter=b" ") -> bytes:
+    """
+    Words to bytes
+    """
+    result = b""
+    for c in string:
+        result += bytes([ord(c) >> 8, ord(c) & 0xFF])
+        result += delimiter
+
+    return result
+
+
+def decimal_encode(string: bytes, delimiter=b" ") -> bytes:
+    """
+    Encode decimal
+    """
+    result = b""
+    for c in string:
+        for n in str(c):
+            result += bytes([ord(n)])
+        result += delimiter
+
+    return result
+
+
+def decimal_decode(string: bytes, delimiter=b" ", verbose=False) -> bytes:
+    """
+    Encode decimal
+    """
+    result = b""
+    if delimiter == b"":
+        if verbose:
+            log("Cannot decode decimal string without delimiter")
+        
+        return None
+
+    tokens = string.split(delimiter)
+
+    for token in tokens:
+        for c in token:
+            if c < 48 or c > 57:
+                return None
+
+    for token in tokens:
+        if token == b"":
+            return result
+        elif int(token) < 0 or int(token) > 256:
+            return None
+        else:
+            result += bytes([int(token)])
+
+    return result
+
+
+def hex_encode(string: bytes) -> bytes:
+    """
+    Encode hex
+    """
+    result = b""
+    for c in string:
+        result += hex(ord(c)).encode()
+
+    return result
+
+
+def hex_decode(string: bytes, endian="big") -> bytes:
+    """
+    Encode hex
+    """
+    result = b""
+    if endian == "big":
+        for i in range(0, len(string), 2):
+            result += bytes.fromhex(chr(string[i]) + chr(string[i + 1]))
+        
+    elif endian == "little":
+        for i in range(len(string) - 1, -1, -2):
+            result += bytes.fromhex(chr(string[i - 1]) + chr(string[i]))
+
+    return result
+
+
 def base32_encode(string: bytes) -> bytes:
     """
     Encode base32
@@ -39,6 +135,10 @@ def base32_decode(string: bytes) -> bytes:
     string = string.replace(b"=", b"\0")
     string = string.replace(b"\n", b"")
 
+    for c in string:
+        if c not in base32_chars:
+            return None
+
     for substring in [string[i:i+8] for i in range(0, len(string), 8)]:
         n = sum(((0 if char == 0 else base32_chars.index(char.to_bytes()) << (7 - i) * 5) for i, char in enumerate(substring)))
         result += b"".join((((n >> (4 - i) * 8) & 255).to_bytes() for i in range(5)))
@@ -79,6 +179,10 @@ def base64_decode(string: bytes) -> bytes:
     string = string.replace(b"=", b"\0")
     string = string.replace(b"\n", b"")
 
+    for c in string:
+        if c not in base64_chars:
+            return None
+
     for substring in [string[i:i+4] for i in range(0, len(string), 4)]:
         n = sum(((0 if char == 0 else base64_chars.index(char.to_bytes()) << (3 - i) * 6) for i, char in enumerate(substring)))
         result += b"".join((((n >> (2 - i) * 8) & 255).to_bytes() for i in range(3)))
@@ -113,18 +217,9 @@ def base85_encode(string: bytes) -> bytes:
 def base85_decode(string: bytes) -> bytes:
     result = b""
     string += b"\0" * (len(string) % 5)
+
     for index, substring in enumerate([string[i: i+5] for i in range(0, len(string), 5)]):
         n = [char - 33 for char in substring]
         m = from_base85(n)
         result += b"".join(((m >> (8 * (3 - i))) & 255).to_bytes() for i in range(4))
     return result.rstrip(b"\0")
-
-
-print(base32_encode(b"Hello World"))
-print(base32_decode(b"JBSWY3DPEBLW64TMMQ======"))
-
-print(base64_encode(b"Hello World"))
-print(base64_decode(b"SGVsbG8gV29ybGQ="))
-
-print(base85_encode(b"Hello World"))
-print(base85_decode(b"87cURD]i,\"Ebo7d"))
