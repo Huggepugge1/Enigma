@@ -1,7 +1,9 @@
 import subprocess
-import encode
-from std_functions import *
-import auto_solve
+
+from . import encode
+from . import std_functions
+from .std_functions import log, output
+from . import auto_solve
 
 
 def get_metadata_from_img(path: str, output_file="stdout", verbose=True):
@@ -21,12 +23,9 @@ def get_metadata_from_img(path: str, output_file="stdout", verbose=True):
 
     for tag in tags:
         decrypted = auto_solve.auto_solve(tags[tag])
-        # print(decrypted)
         if decrypted[0][0] is not None:
             log(f"Possible point of interest: {decrypted[0][0]} of {tags[tag]} gives {decrypted[0][1]}")
 
 
     return tags
 
-
-get_metadata_from_img("src/cat.jpg", verbose=False)

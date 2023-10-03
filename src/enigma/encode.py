@@ -1,4 +1,5 @@
-from std_functions import *
+from . import std_functions
+from .std_functions import log, output
 
 
 def bytes_to_words(string: bytes, delimiter=" ") -> str:

@@ -1,7 +1,9 @@
 import math
 import nltk
 from nltk.corpus import brown
-from std_functions import log, output
+
+from . import std_functions
+from .std_functions import log, output
 
 wordlist = set(brown.words())
 
@@ -149,7 +151,7 @@ def caesar(
                     result.append(current_result)
 
         if verbose and known_strings is not None:
-            print(f"Could not find any \"n\" that satisfies {known_strings}")
+            output(f"Could not find any \"n\" that satisfies {known_strings}", output_file=output_file)
 
     else:
         if verbose:
@@ -175,4 +177,3 @@ def caesar(
     result.sort(key=calculate_similarity_to_english, reverse=True)
     return result
 
-# print(calculate_similarity_to_english(b"src"))

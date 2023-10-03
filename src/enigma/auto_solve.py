@@ -1,5 +1,5 @@
-import encrypt
-import encode
+from . import encrypt
+from . import encode
 
 encryption_functions = [
     "caesar"

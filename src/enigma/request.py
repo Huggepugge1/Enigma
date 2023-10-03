@@ -7,4 +7,5 @@ def request(method: str, url: str, body: dict={}):
     elif method.lower() == "post":
         return requests.post(url, body)
     elif method.lower() == "head":
-        return requests.head(url, body)
+        return requests.head(url)
+

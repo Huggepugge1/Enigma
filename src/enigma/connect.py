@@ -1,5 +1,6 @@
 import socket
-import encode
+
+from . import encode
 
 
 class Connection:
