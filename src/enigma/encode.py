@@ -74,7 +74,7 @@ def hex_encode(string: bytes) -> bytes:
     """
     result = b""
     for c in string:
-        result += hex(ord(c)).encode()
+        result += hex(c)[2:].zfill(2).encode('utf-8')
 
     return result
 

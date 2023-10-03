@@ -11,7 +11,11 @@ class Connection:
         self.socket.connect((self.host, self.port))
 
 
-    def recv(self, bytes: int) -> bytes:
+    def close(self):
+        return self.close()
+
+
+    def recv(self, bytes: int=1024) -> bytes:
         return self.socket.recv(bytes)
 
 
@@ -19,6 +23,16 @@ class Connection:
         recieved_string = b""
         while (recieved_byte := self.socket.recv(1)) != b"\n":
             recieved_string += recieved_byte
+        
+        return recieved_string
+    
+
+    def recvuntil(self, string: bytes) -> bytes:
+        recieved_string = b""
+        while recieved_byte := self.socket.recv(1):
+            recieved_string += recieved_byte
+            if string in recieved_string:
+                break
         
         return recieved_string
 

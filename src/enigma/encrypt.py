@@ -1,6 +1,7 @@
 import math
 import nltk
 from nltk.corpus import brown
+from factordb.factordb import FactorDB
 
 from . import std_functions
 from .std_functions import log, output
@@ -77,13 +78,97 @@ def calculate_similarity_to_english(input_text: bytes) -> float:
     return similarity
 
 
+def rot(
+    string: bytes,
+    n: int = None,
+    alphabet: bytes = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+    known_strings: list[bytes] = None, 
+    possible_strings: list[bytes] = None,
+    verbose: bool = False, 
+    output_file: str = "stdout") -> list[bytes]:
+    result = []
+
+    if n is not None:
+        current_result = b""
+        for char in string:
+            if char in alphabet:
+                current_result += alphabet[(alphabet.find(char) + n) % len(alphabet)].to_bytes()
+            else:
+                current_result += char.to_bytes()
+        result.append(current_result)
+
+    elif known_strings is not None or possible_strings is not None:
+        for i in range(1, len(alphabealphabett)):
+            current_result = b""
+            for char in string:
+                if char in alphabet:
+                    current_result += alphabet[(alphabet.find(char) + i) % len(alphabet)].to_bytes()
+                else:
+                    current_result += char.to_bytes()
+
+            if known_strings is not None:
+                for s in known_strings:
+                    if s.lower() not in current_result.lower():
+                        break
+                else:
+                    if verbose:
+                        output(f"Found \"n\" = {i} such that it satisfies all known_strings ({known_strings})",
+                               output_file=output_file)
+                        output(current_result, output_file=output_file)
+                    else:
+                        output(f"Possible candidate \"n\" = {i}", use_verbose=True, output_file=output_file)
+                    result.append(current_result)
+                    continue
+
+            if possible_strings is not None:
+                found = []
+                for s in possible_strings:
+                    if s.lower() in current_result.lower():
+                        found.append(s.lower())
+
+                if len(found) > 0:
+                    if verbose:
+                        output("--------------------------------")
+                        output(f"Possible candidate n = \"{i}\", contains \"{found}\"", output_file=output_file)
+                        output(current_result, end="\n\n", output_file=output_file)
+                    else:
+                        output(f"Possible candidate n = \"{i}\"", use_verbose=True, output_file=output_file)
+                    result.append(current_result)
+
+        if verbose and known_strings is not None:
+            output(f"Could not find any \"n\" that satisfies {known_strings}", output_file=output_file)
+
+    else:
+        if verbose:
+            log("Outputting all possibilities of Caesar-cipher")
+        for i in range(1, len(alphabet)):
+            if verbose:
+                output("-----------------------------------------------", output_file=output_file)
+                output(f"Current n: {i}\n", output_file=output_file)
+
+            current_result = b""
+            for char in string:
+                char = char
+                if char in alphabet:
+                    current_result += alphabet[(alphabet.find(char) + i) % len(alphabet)].to_bytes()
+                else:
+                    current_result += char.to_bytes()
+            if verbose:
+                output(current_result, output_file=output_file)
+            result.append(current_result)
+
+    result.sort(key=calculate_similarity_to_english, reverse=True)
+    return result
+
+
+
 def caesar(
-        string: bytes, 
-        n: int = None, 
-        known_strings: list[bytes] = None, 
-        possible_strings: list[bytes] = None,
-        verbose: bool = False, 
-        output_file: str = "stdout") -> list[bytes]:
+    string: bytes, 
+    n: int = None, 
+    known_strings: list[bytes] = None, 
+    possible_strings: list[bytes] = None,
+    verbose: bool = False, 
+    output_file: str = "stdout") -> list[bytes]:
     """
     Decrypt Caesar-ciphers.
     Returns a list of all possibilities. Ranks them by likelihood of english
@@ -176,4 +261,39 @@ def caesar(
 
     result.sort(key=calculate_similarity_to_english, reverse=True)
     return result
+
+
+def rsa_decrypt(
+    c: int = None, 
+    e: int = 65537,
+    n: int = None,
+    d: int = None,
+    verbose: bool = False, 
+    output_file: str = "stdout"):
+    """
+    Decrypt RSA-ciphers.
+    Arguments:
+        string: input string
+        c (int): cipher text
+        n (int): private key exponent
+        n (int): public key value
+        d (int): public key value
+        verbose (bool): True/False
+        output_file: output file path
+    """
+    if c is None:
+        output("C can not be None")
+        return None
+    if n is None:
+        output("n can not be None")
+        return None
+    if d is None:
+        f = FactorDB(n)
+        f.connect()
+        (p, q) = f.get_factor_list()
+        phi = (p - 1) * (q - 1)
+        d = pow(e, -1, phi)
+
+    decrypted_integer = pow(c, d, n)
+    return decrypted_integer.to_bytes((decrypted_integer.bit_length() + 7) // 8, byteorder="big")
 
