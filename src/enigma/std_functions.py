@@ -35,7 +35,7 @@ def print_file(path: str, output_file: str="stdout", verbose: bool=False):
 
 
 def get_file_contents(path: str, output_file: str="stdout", verbose: bool=False):
-    with open(path, "br") as file:
+    with open(path, "rb") as file:
         if verbose:
             output("-" * 30, output_file=output_file)
             output(f"{path}", output_file=output_file)
