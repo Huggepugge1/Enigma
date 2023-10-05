@@ -8,12 +8,14 @@ from .std_functions import log, output
 
 
 class RequestThread(threading.Thread):
-    def __init__(self, method: str, url: str, request_body: dict={}, request_cookies: dict={}):
+    def __init__(self, method: str, url: str, request_body: dict={}, files: dict={}, request_cookies: dict={}, proxies: dict={}):
         super().__init__()
         self.method = method
         self.url = url
-        self.request_body = request_body
+        self.request_body    = request_body
+        self.files           = files
         self.request_cookies = request_cookies
+        self.proxies         = proxies
         
         self.response = None
         
@@ -51,11 +53,11 @@ class RequestThread(threading.Thread):
         """
         try:
             if self.method.lower() == "get":
-                self.response = requests.get(self.url, cookies=self.request_cookies)
+                self.response = requests.get(self.url, cookies=self.request_cookies, proxies=self.proxies)
             elif self.method.lower() == "post":
-                return requests.post(self.url, self.body, cookies=self.request_cookies)
+                self.response = requests.post(self.url, self.request_body, files=self.files, cookies=self.request_cookies, proxies=self.proxies)
             elif self.method.lower() == "head":
-                self.response = requests.head(self.url, cookies=self.request_cookies)
+                self.response = requests.head(self.url, cookies=self.request_cookies, proxies=self.proxies)
             else:
                 output(f"{self.method} is not yet a supported method")
                 self.response = None
@@ -154,16 +156,17 @@ class MultiRequestHandler(threading.Thread):
                 thread.join()
 
 
-def request(method: str, url: str, body: dict={}, cookies: dict={}):
+def request(method: str, url: str, body: dict={}, files: dict={}, cookies: dict={}, proxies: dict={}):
     """
     Send request to webserver (runs in seperate thread for speed in case of multiple requests are needed)
     Arguments:
         method (str): method of request (GET, POST, HEAD currently supported)
         url (str): url
         body (dict): body of request
+        files (dict): files to send
         cookies (dict): specific cookies to send
         n (int): expected number of requests
     """
-    thread = RequestThread(method, url, request_body=body, request_cookies=cookies)
+    thread = RequestThread(method, url, request_body=body, files=files, request_cookies=cookies, proxies=proxies)
     return thread
 
