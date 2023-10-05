@@ -31,11 +31,11 @@ def print_file(path: str, output_file: str="stdout", verbose: bool=False):
             output(f"{path}", output_file=output_file)
             output("-" * 30 + "\n", output_file=output_file)
         
-        output(file.read(, output_file=output_file))
+        output(file.read(), output_file=output_file))
 
 
 def get_file_contents(path: str, output_file: str="stdout", verbose: bool=False):
-    with open(path, "r") as file:
+    with open(path, "br") as file:
         if verbose:
             output("-" * 30, output_file=output_file)
             output(f"{path}", output_file=output_file)
