@@ -31,7 +31,7 @@ def print_file(path: str, output_file: str="stdout", verbose: bool=False):
             output(f"{path}", output_file=output_file)
             output("-" * 30 + "\n", output_file=output_file)
         
-        output(file.read(), output_file=output_file))
+        output(file.read(), output_file=output_file)
 
 
 def get_file_contents(path: str, output_file: str="stdout", verbose: bool=False):
