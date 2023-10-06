@@ -1,7 +1,7 @@
 README.md
 setup.py
 src/enigma/__init__.py
-src/enigma/auto_solve.py
+src/enigma/auto_decrypt.py
 src/enigma/connect.py
 src/enigma/encode.py
 src/enigma/encrypt.py

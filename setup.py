@@ -10,5 +10,5 @@ setup(
     author_email="huggepugge1@gmail.com",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    install_requires=["nltk"]
+    install_requires=["nltk", "factordb-pycli"]
 )
